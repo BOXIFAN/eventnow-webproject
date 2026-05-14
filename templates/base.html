@@ -1,0 +1,60 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EventNow{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+</head>
+<body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <header class="site-header">
+        <div class="container">
+            <div class="header-content">
+                <a class="site-logo" href="{% url 'home' %}">EventNow</a>
+                <nav class="site-nav" aria-label="Main navigation">
+                    <a href="{% url 'home' %}">Home</a>
+                    <a href="{% url 'events:event_list' %}">Events</a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'events:recommended_events' %}">Recommended</a>
+                        <a href="{% url 'events:my_registrations' %}">My Registrations</a>
+                        {% if user.is_superuser or user.userprofile.role == "organiser" or user.userprofile.role == "admin" %}
+                            <a href="{% url 'events:organiser_dashboard' %}">Organiser Dashboard</a>
+                        {% else %}
+                            <a href="{% url 'subscriptions:organisation_request' %}">Request Organiser Access</a>
+                        {% endif %}
+                        {% if user.is_superuser or user.userprofile.role == "admin" %}
+                            <a href="{% url 'subscriptions:subscription_list' %}">Subscriptions</a>
+                        {% endif %}
+                        <span class="nav-user">Hi, {{ user.username }}</span>
+                        <a href="{% url 'accounts:logout' %}">Logout</a>
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}">Login</a>
+                        <a href="{% url 'accounts:register' %}">Register</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main id="main-content" class="container page-content">
+        {% if messages %}
+            <div class="messages" role="alert" aria-live="polite">
+                {% for message in messages %}
+                    <p class="message {{ message.tags }}">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {# 子页面通过 content block 放入自己的主要内容。 #}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 EventNow. Discover, register for, and manage campus and local events with role-aware workflows.</p>
+        </div>
+    </footer>
+</body>
+</html>

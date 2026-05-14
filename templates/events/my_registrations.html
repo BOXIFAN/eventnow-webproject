@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}EventNow | My Registrations{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <h1>My Registrations</h1>
+    <p>Track the events and sessions you have registered for.</p>
+</section>
+
+{% if registrations %}
+    <section class="registration-grid">
+        {% for registration in registrations %}
+            <article class="registration-card">
+                <div class="detail-header">
+                    <h2>{{ registration.event.title }}</h2>
+                    <span class="status-badge status-{{ registration.status }}">{{ registration.get_status_display }}</span>
+                </div>
+                {% if registration.event.image %}
+                    <img class="event-inline-image" src="{{ registration.event.image.url }}" alt="{{ registration.event.title }} event image">
+                {% endif %}
+                <p>{{ registration.event.start_datetime|date:"M d, Y H:i" }} - {{ registration.event.end_datetime|date:"M d, Y H:i" }}</p>
+                <p>Registered at: {{ registration.created_at|date:"M d, Y H:i" }}</p>
+
+                <h3>Selected Sessions</h3>
+                {% if registration.session_selections.all %}
+                    <ul class="plain-list">
+                        {% for selection in registration.session_selections.all %}
+                            <li>
+                                {{ selection.session.title }}
+                                ({{ selection.session.start_datetime|date:"M d, H:i" }} - {{ selection.session.end_datetime|date:"H:i" }})
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No sessions selected.</p>
+                {% endif %}
+
+                <div class="action-row">
+                    <a class="button btn btn-secondary" href="{% url 'events:event_detail' registration.event.id %}">View Event</a>
+                    {% if registration.status == "registered" %}
+                        <a class="button btn btn-danger" href="{% url 'events:registration_cancel' registration.id %}">Cancel Registration</a>
+                    {% endif %}
+                </div>
+            </article>
+        {% endfor %}
+    </section>
+{% else %}
+    <section class="content-panel empty-state">
+        <h2>You have not registered for any events yet.</h2>
+        <p>Browse published events and register for sessions you want to attend.</p>
+        <a class="button btn btn-primary" href="{% url 'events:event_list' %}">Browse Events</a>
+    </section>
+{% endif %}
+{% endblock %}

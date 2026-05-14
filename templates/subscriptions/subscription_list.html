@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}EventNow | Subscriptions{% endblock %}
+
+{% block content %}
+<section class="page-heading with-actions">
+    <div>
+        <h1>Subscription Management</h1>
+        <p>Manage SaaS subscriptions for organiser organisations. Archived subscriptions are kept for records instead of being deleted.</p>
+    </div>
+    <a class="button btn btn-primary" href="{% url 'subscriptions:subscription_create' %}">Create Subscription</a>
+</section>
+
+{% if pending_organisations %}
+    <section class="content-panel">
+        <h2>Pending Organisations</h2>
+        <p>Review organiser access requests here. Creating an active subscription will activate the organisation and promote the owner to organiser access.</p>
+        <div class="table-wrapper table-wrap">
+            <table class="data-table responsive-table">
+                <thead>
+                    <tr>
+                        <th>Organisation</th>
+                        <th>Owner</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for organisation in pending_organisations %}
+                        <tr>
+                            <td data-label="Organisation">{{ organisation.name }}</td>
+                            <td data-label="Owner">{{ organisation.owner.username }}</td>
+                            <td data-label="Status"><span class="status-badge status-{{ organisation.status }}">{{ organisation.get_status_display }}</span></td>
+                            <td data-label="Created">{{ organisation.created_at|date:"M d, Y H:i" }}</td>
+                            <td data-label="Actions">
+                                <div class="action-row">
+                                    <a class="button btn btn-primary btn-small" href="{% url 'subscriptions:subscription_create' %}?organisation={{ organisation.id }}">Create Subscription</a>
+                                    <form method="post" action="{% url 'subscriptions:organisation_reject' organisation.id %}">
+                                        {% csrf_token %}
+                                        <button class="button btn btn-danger btn-small" type="submit">Reject</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endif %}
+
+<form class="filter-panel" method="get">
+    <label>
+        <span>Search</span>
+        <input type="search" name="q" value="{{ keyword }}" placeholder="Organisation or plan">
+    </label>
+    <label>
+        <span>Status</span>
+        <select name="status">
+            <option value="">All statuses</option>
+            {% for value, label in status_choices %}
+                <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </label>
+    <button class="button btn btn-secondary" type="submit">Filter</button>
+    <a class="button btn btn-secondary" href="{% url 'subscriptions:subscription_list' %}">Reset</a>
+</form>
+
+{% if subscriptions %}
+    <div class="table-wrapper table-wrap">
+        <table class="data-table responsive-table">
+            <thead>
+                <tr>
+                    <th>Organisation</th>
+                    <th>Owner</th>
+                    <th>Plan</th>
+                    <th>Status</th>
+                    <th>Start date</th>
+                    <th>End date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+                <tbody>
+                    {% for subscription in subscriptions %}
+                        <tr>
+                        <td data-label="Organisation">{{ subscription.organisation.name }}</td>
+                        <td data-label="Owner">{{ subscription.organisation.owner.username }}</td>
+                        <td data-label="Plan">{{ subscription.plan_name }}</td>
+                        <td data-label="Status">
+                            <span class="status-badge status-{{ subscription.status }}">
+                                {{ subscription.get_status_display }}
+                            </span>
+                            {% if subscription.status == "active" and not subscription.is_currently_active %}
+                                <span class="full-badge">Active status, but date expired</span>
+                            {% endif %}
+                        </td>
+                        <td data-label="Start date">{{ subscription.start_date }}</td>
+                        <td data-label="End date">{{ subscription.end_date }}</td>
+                        <td data-label="Actions">
+                            <div class="action-row">
+                                <a class="button btn btn-primary btn-small" href="{% url 'subscriptions:subscription_edit' subscription.id %}">Edit</a>
+                                {% if subscription.status == "active" %}
+                                    <a class="button btn btn-danger btn-small" href="{% url 'subscriptions:subscription_archive' subscription.id %}">Archive</a>
+                                {% else %}
+                                    <form method="post" action="{% url 'subscriptions:subscription_reactivate' subscription.id %}">
+                                        {% csrf_token %}
+                                        <button class="button btn btn-success btn-small" type="submit">Reactivate</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <nav class="pagination" aria-label="Subscription pages">
+        {% if page_obj.has_previous %}
+            <a class="button btn btn-secondary" href="?page={{ page_obj.previous_page_number }}&q={{ keyword }}&status={{ status }}">Previous</a>
+        {% else %}
+            <span class="button btn btn-disabled">Previous</span>
+        {% endif %}
+
+        <span class="pagination-current">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+            <a class="button btn btn-secondary" href="?page={{ page_obj.next_page_number }}&q={{ keyword }}&status={{ status }}">Next</a>
+        {% else %}
+            <span class="button btn btn-disabled">Next</span>
+        {% endif %}
+    </nav>
+{% else %}
+    <section class="content-panel empty-state">
+        <h2>No subscriptions found</h2>
+        {% if pending_organisations %}
+            <p>There are pending organisation requests above. Create a subscription when you are ready to activate organiser publishing access.</p>
+        {% else %}
+            <p>Create a subscription for an organiser organisation, or adjust your search filters.</p>
+        {% endif %}
+        <a class="button btn btn-primary" href="{% url 'subscriptions:subscription_create' %}">Create Subscription</a>
+    </section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}EventNow | Home{% endblock %}
+
+{% block content %}
+<section class="hero-panel">
+    <div class="hero-copy">
+        <p class="eyebrow">Event Management Platform</p>
+        <h1>Discover and Join Amazing Events Near You</h1>
+        <p>EventNow helps users browse local and campus events, explore sessions, and register through a clear and simple interface.</p>
+        <div class="hero-actions">
+            <a class="button primary-button" href="{% url 'events:event_list' %}">Browse Events</a>
+            {% if user.is_authenticated %}
+                <a class="button secondary-button" href="{% url 'events:recommended_events' %}">View Recommended Events</a>
+            {% else %}
+                <a class="button secondary-button" href="{% url 'accounts:register' %}">Register</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="search-card">
+        <h2>Search Events</h2>
+        <form class="home-search-form" action="{% url 'events:event_list' %}" method="get">
+            <label for="home-event-search">Keyword</label>
+            <input id="home-event-search" type="search" name="q" placeholder="Search events">
+            <p class="search-note">Use the Events page to refine by category and browse published event cards.</p>
+            <button class="button primary-button" type="submit">Find Events</button>
+        </form>
+    </div>
+</section>
+
+<section class="home-section">
+    <div class="section-heading">
+        <h2>Popular Categories</h2>
+        <p>Start with broad event types, then refine your search on the Events page.</p>
+    </div>
+    <div class="category-grid">
+        <a class="category-card" href="{% url 'events:event_list' %}?q=workshop" aria-label="Browse workshop events">
+            <h3>Workshops</h3>
+            <p>Hands-on learning sessions, guided practice, and skill-building events.</p>
+            <span class="category-card-link">Browse category &rarr;</span>
+        </a>
+        <a class="category-card" href="{% url 'events:event_list' %}?q=networking" aria-label="Browse networking events">
+            <h3>Networking</h3>
+            <p>Meet organisers, peers, and community members through social event formats.</p>
+            <span class="category-card-link">Browse category &rarr;</span>
+        </a>
+        <a class="category-card" href="{% url 'events:event_list' %}?q=sports" aria-label="Browse sports events">
+            <h3>Sports</h3>
+            <p>Browse active events, campus competitions, and community sports meetups.</p>
+            <span class="category-card-link">Browse category &rarr;</span>
+        </a>
+        <a class="category-card" href="{% url 'events:event_list' %}?q=music" aria-label="Browse music and culture events">
+            <h3>Music &amp; Culture</h3>
+            <p>Find music, performance, and themed social activities in one event website.</p>
+            <span class="category-card-link">Browse category &rarr;</span>
+        </a>
+    </div>
+</section>
+
+<section class="feature-grid">
+    <article class="info-card">
+        <h2>Public Event Website</h2>
+        <p>Browse published events, open full event detail pages, and register without losing track of session and event capacity.</p>
+    </article>
+    <article class="info-card">
+        <h2>Organiser Workflow</h2>
+        <p>Create, edit, archive, and monitor events from one workflow that connects event setup, session management, and registration tracking.</p>
+    </article>
+    <article class="info-card">
+        <h2>Admin Oversight</h2>
+        <p>Support organiser approval and subscription management while keeping archived records available for review and reporting.</p>
+    </article>
+</section>
+
+<section class="home-section">
+    <div class="callout-panel">
+        <div>
+            <h2>Ready to browse current events?</h2>
+            <p>Open the Events page to search, filter, and explore published event cards with venue, date, image, and detail links.</p>
+        </div>
+        <a class="button primary-button" href="{% url 'events:event_list' %}">Browse Events</a>
+    </div>
+</section>
+{% endblock %}

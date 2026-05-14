@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}EventNow | Recommended Events{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <p class="eyebrow">Recommended For You</p>
+    <h1>Suggested events based on your activity and available capacity.</h1>
+    <p>These recommendations use your previous registrations, event categories, organiser organisations, and current availability.</p>
+</section>
+
+{% if recommendations %}
+    <section class="recommendation-grid">
+        {% for item in recommendations %}
+            <article class="event-card recommendation-card">
+                <div class="event-card-image-wrap">
+                    {% if item.event.image %}
+                        <img class="event-card-image" src="{{ item.event.image.url }}" alt="{{ item.event.title }} event image">
+                    {% else %}
+                        <div class="event-image-placeholder">No image provided</div>
+                    {% endif %}
+                </div>
+                <div class="event-card-body">
+                    <div class="card-meta">
+                        <span class="meta-chip">{{ item.event.category.name }}</span>
+                        <span>{{ item.event.start_datetime|date:"M d, Y H:i" }}</span>
+                    </div>
+                    <h2>{{ item.event.title }}</h2>
+                    <p>{{ item.event.organisation.name }}</p>
+                    <p class="capacity-text">{{ item.remaining_capacity }} event spots remaining</p>
+                    <p class="recommendation-score">Score: {{ item.score }}</p>
+                    <div class="recommendation-reasons">
+                        {% for reason in item.reasons %}
+                            <span class="reason-badge">{{ reason }}</span>
+                        {% endfor %}
+                    </div>
+                    <a class="button secondary-button" href="{% url 'events:event_detail' item.event.id %}">View Details</a>
+                </div>
+            </article>
+        {% endfor %}
+    </section>
+{% else %}
+    <section class="content-panel empty-state">
+        <h2>No recommendations are available yet.</h2>
+        <p>Possible reasons:</p>
+        <ul class="plain-list">
+            <li>No published events with available capacity were found.</li>
+            <li>You may already be registered for the currently available events.</li>
+            <li>Try browsing events first so EventNow has more activity to work with.</li>
+        </ul>
+        <a class="button primary-button" href="{% url 'events:event_list' %}">Browse Events</a>
+    </section>
+{% endif %}
+{% endblock %}

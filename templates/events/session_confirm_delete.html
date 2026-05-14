@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}EventNow | Delete Session{% endblock %}
+
+{% block content %}
+<section class="content-panel">
+    <h1>Delete Session</h1>
+    <p>Are you sure you want to delete "{{ session.title }}" from "{{ event.title }}"?</p>
+    <p>This action cannot be undone.</p>
+
+    <form class="form-actions" method="post">
+        {% csrf_token %}
+        <button class="button danger-button" type="submit">Confirm Delete</button>
+        <a class="button secondary-button" href="{% url 'events:session_list' event.id %}">Cancel</a>
+    </form>
+</section>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}EventNow | Organiser Dashboard{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <h1>Organiser Dashboard</h1>
+    {% if is_admin_view %}
+        <p>Admin view: these stats include all platform events.</p>
+    {% else %}
+        <p>Manage the organiser workflow for events, sessions, and registrations.</p>
+    {% endif %}
+    <p>Use Manage Events to reach session management and registration tracking for each event.</p>
+</section>
+
+<section class="stat-grid">
+    <article class="stat-card">
+        <span class="stat-label">Events</span>
+        <strong>{{ event_count }}</strong>
+    </article>
+    <article class="stat-card">
+        <span class="stat-label">Active Registrations</span>
+        <strong>{{ active_registration_count }}</strong>
+    </article>
+    <article class="stat-card">
+        <span class="stat-label">Sessions</span>
+        <strong>{{ session_count }}</strong>
+    </article>
+    <article class="stat-card">
+        <span class="stat-label">Full Sessions</span>
+        <strong>{{ full_session_count }}</strong>
+    </article>
+</section>
+
+{% if not has_publishing_access %}
+    <section class="warning-box">
+        <p>You can still browse and register for public events, but cannot create or edit organiser events until your organisation has an active subscription.</p>
+        {% if pending_organisation %}
+            <p>Your organisation request is pending admin review.</p>
+        {% elif not has_any_organisation %}
+            <div class="form-actions">
+                <a class="button primary-button" href="{% url 'subscriptions:organisation_request' %}">Request Organiser Access</a>
+            </div>
+        {% elif rejected_organisation %}
+            <p>Your previous organisation request was rejected. Please contact the platform administrator before submitting another request.</p>
+            <div class="form-actions">
+                <a class="button secondary-button" href="{% url 'subscriptions:organisation_request' %}">Request Organiser Access</a>
+            </div>
+        {% else %}
+            <p>Please contact the platform administrator or wait for subscription reactivation.</p>
+        {% endif %}
+    </section>
+{% endif %}
+
+<section class="dashboard-grid">
+    <a class="dashboard-card" href="{% url 'events:organiser_event_list' %}">
+        <h2>Manage Events</h2>
+        <p>Manage all event workflows in one place, including editing events, managing sessions, viewing registrations, and archiving events.</p>
+    </a>
+
+    <a class="dashboard-card" href="{% url 'events:event_create' %}">
+        <h2>Create Event</h2>
+        <p>Create a new event and submit it for later admin review.</p>
+    </a>
+</section>
+{% endblock %}

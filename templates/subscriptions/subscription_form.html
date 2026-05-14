@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}EventNow | {{ page_title }}{% endblock %}
+
+{% block content %}
+<section class="content-panel form-card">
+    <h1>{{ page_title }}</h1>
+    <p>Configure subscription status and dates carefully. Archived records are kept instead of being deleted.</p>
+
+    <form class="auth-form" method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        {% for field in form %}
+            <div class="form-field">
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.help_text %}
+                    <small>{{ field.help_text }}</small>
+                {% endif %}
+                {{ field.errors }}
+            </div>
+        {% endfor %}
+
+        <div class="form-actions">
+            <button class="button primary-button" type="submit">{{ submit_label }}</button>
+            <a class="button secondary-button" href="{% url 'subscriptions:subscription_list' %}">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

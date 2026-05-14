@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}EventNow | Register for Event{% endblock %}
+
+{% block content %}
+<section class="content-panel form-card">
+    <h1>Register for {{ event.title }}</h1>
+    <p>{{ event.description }}</p>
+
+    <dl class="detail-grid">
+        <div>
+            <dt>Time</dt>
+            <dd>{{ event.start_datetime|date:"M d, Y H:i" }} - {{ event.end_datetime|date:"M d, Y H:i" }}</dd>
+        </div>
+        <div>
+            <dt>Event registration capacity</dt>
+            <dd>
+                {{ event.capacity }} total, {{ event_remaining_capacity }} remaining
+                <span class="capacity-help">Event capacity controls total registrations.</span>
+            </dd>
+        </div>
+    </dl>
+
+    <div class="help-panel">
+        <p>Event capacity controls total registrations.</p>
+        <p>Session capacity controls availability for selected sessions.</p>
+    </div>
+
+    {% if event_full %}
+        <p class="message warning">This event has reached its total registration capacity.</p>
+        <div class="action-row">
+            <a class="button btn btn-secondary" href="{% url 'events:event_detail' event.id %}">Back to Event</a>
+        </div>
+    {% else %}
+        <form class="registration-form" method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <h2>Select Sessions</h2>
+            <p>Choose at least one session for this event.</p>
+
+            {% if event_sessions %}
+                <div class="session-choice-list">
+                    {% for session in event_sessions %}
+                        <label class="session-choice-card {% if session.remaining_capacity <= 0 %}is-disabled{% endif %}">
+                            <input
+                                type="checkbox"
+                                name="sessions"
+                                value="{{ session.id }}"
+                                {% if session.remaining_capacity <= 0 %}disabled{% endif %}
+                            >
+                            <span>
+                                <strong>{{ session.title }}</strong><br>
+                                {{ session.start_datetime|date:"M d, Y H:i" }} - {{ session.end_datetime|date:"H:i" }}<br>
+                                Remaining: {{ session.remaining_capacity }}
+                                {% if session.remaining_capacity <= 0 %}
+                                    <span class="full-badge">Full</span>
+                                {% endif %}
+                            </span>
+                        </label>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="message warning">No sessions have been added for this event yet.</p>
+            {% endif %}
+
+            {{ form.sessions.errors }}
+
+            <div class="action-row">
+                <button class="button btn btn-primary" type="submit">Submit Registration</button>
+                <a class="button btn btn-secondary" href="{% url 'events:event_detail' event.id %}">Back to Event</a>
+            </div>
+        </form>
+    {% endif %}
+</section>
+{% endblock %}

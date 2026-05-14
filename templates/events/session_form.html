@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}EventNow | {{ page_title }}{% endblock %}
+
+{% block content %}
+<section class="content-panel">
+    <h1>{{ page_title }}</h1>
+    <p>Event: {{ event.title }}</p>
+
+    <div class="help-panel">
+        <p>Session times should fit within the event schedule.</p>
+        <p>Session capacity cannot exceed the event's total registration capacity.</p>
+        <p>{{ event.start_datetime|date:"M d, Y H:i" }} - {{ event.end_datetime|date:"M d, Y H:i" }}</p>
+    </div>
+
+    <form class="auth-form" method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        {% for field in form %}
+            <div class="form-field">
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.help_text %}
+                    <small>{{ field.help_text }}</small>
+                {% endif %}
+                {{ field.errors }}
+            </div>
+        {% endfor %}
+
+        <div class="form-actions">
+            <button class="button primary-button" type="submit">{{ submit_label }}</button>
+            <a class="button secondary-button" href="{% url 'events:session_list' event.id %}">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

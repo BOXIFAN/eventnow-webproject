@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}EventNow | Archive Subscription{% endblock %}
+
+{% block content %}
+<section class="content-panel">
+    <h1>Archive Subscription</h1>
+    <p>Are you sure you want to archive "{{ subscription }}"?</p>
+    <p>Archive will keep the record but mark it inactive for normal use.</p>
+
+    <form class="form-actions" method="post">
+        {% csrf_token %}
+        <button class="button danger-button" type="submit">Confirm Archive</button>
+        <a class="button secondary-button" href="{% url 'subscriptions:subscription_list' %}">Cancel</a>
+    </form>
+</section>
+{% endblock %}

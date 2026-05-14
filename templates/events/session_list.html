@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}EventNow | Manage Sessions{% endblock %}
+
+{% block content %}
+<section class="page-heading with-actions">
+    <div>
+        <h1>Manage Sessions</h1>
+        <p>{{ event.title }}</p>
+        <p>{{ event.start_datetime|date:"M d, Y H:i" }} - {{ event.end_datetime|date:"M d, Y H:i" }}</p>
+    </div>
+    {% if can_write %}
+        <a class="button btn btn-primary" href="{% url 'events:session_create' event.id %}">Create Session</a>
+    {% endif %}
+</section>
+
+{% if not can_write %}
+    <p class="warning-box">This organisation does not have an active subscription. Sessions are read-only.</p>
+{% endif %}
+
+<div class="action-row">
+    <a class="button btn btn-secondary" href="{% url 'events:organiser_event_list' %}">Back to Manage Events</a>
+    <a class="button btn btn-secondary" href="{% url 'events:event_detail' event.id %}">View Event Detail</a>
+</div>
+
+{% if sessions %}
+    <div class="table-wrapper table-wrap session-table">
+        <table class="data-table responsive-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Capacity</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for session in sessions %}
+                    <tr>
+                        <td data-label="Title">{{ session.title }}</td>
+                        <td data-label="Start">{{ session.start_datetime|date:"M d, Y H:i" }}</td>
+                        <td data-label="End">{{ session.end_datetime|date:"M d, Y H:i" }}</td>
+                        <td data-label="Capacity">{{ session.capacity }}</td>
+                        <td data-label="Actions">
+                            <div class="action-row">
+                                {% if can_write %}
+                                    <a class="button btn btn-primary btn-small" href="{% url 'events:session_edit' session.id %}">Edit</a>
+                                    <a class="button btn btn-danger btn-small" href="{% url 'events:session_delete' session.id %}">Delete Session</a>
+                                {% else %}
+                                    <span class="badge-readonly">Read-only: subscription inactive</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <section class="content-panel empty-state">
+        <h2>No sessions have been added for this event yet.</h2>
+        <p>Create sessions so attendees can later choose the parts of the event they want to join.</p>
+        {% if can_write %}
+            <a class="button btn btn-primary" href="{% url 'events:session_create' event.id %}">Create First Session</a>
+        {% endif %}
+    </section>
+{% endif %}
+{% endblock %}

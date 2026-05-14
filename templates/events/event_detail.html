@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}EventNow | Event Detail{% endblock %}
+
+{% block content %}
+<section class="content-panel event-detail-panel">
+    {% if event.image %}
+        <img class="event-detail-image" src="{{ event.image.url }}" alt="{{ event.title }} event image">
+    {% else %}
+        <div class="event-detail-image-placeholder">No image provided</div>
+    {% endif %}
+
+    <div class="detail-header">
+        <h1>{{ event.title }}</h1>
+        <span class="status-badge status-{{ event.status }}">{{ event.get_status_display }}</span>
+    </div>
+
+    <p class="lead-text">{{ event.description }}</p>
+
+    {% if event.status == "archived" and can_manage %}
+        <p class="message warning">This event is archived and hidden from public users.</p>
+    {% endif %}
+
+    {% if can_manage and not can_write %}
+        <p class="warning-box">This event is read-only because the organisation subscription is inactive.</p>
+    {% endif %}
+
+    <dl class="detail-grid">
+        <div>
+            <dt>Category</dt>
+            <dd>{{ event.category.name }}</dd>
+        </div>
+        <div>
+            <dt>Organisation</dt>
+            <dd>{{ event.organisation.name }}</dd>
+        </div>
+        <div>
+            <dt>Venue</dt>
+            <dd>{{ event.venue.name }}{% if event.venue.room %}, {{ event.venue.room }}{% endif %}</dd>
+        </div>
+        <div>
+            <dt>Address</dt>
+            <dd>{{ event.venue.address }}, {{ event.venue.city }}</dd>
+        </div>
+        <div>
+            <dt>Time</dt>
+            <dd>{{ event.start_datetime|date:"M d, Y H:i" }} - {{ event.end_datetime|date:"M d, Y H:i" }}</dd>
+        </div>
+        <div>
+            <dt>Event registration capacity</dt>
+            <dd>
+                {{ event.capacity }} total, {{ event_remaining_capacity }} remaining
+                <span class="capacity-help">Event capacity controls the total number of registrations.</span>
+            </dd>
+        </div>
+        <div>
+            <dt>Price</dt>
+            <dd>{% if event.price == 0 %}Free{% else %}${{ event.price }}{% endif %}</dd>
+        </div>
+    </dl>
+
+    <section class="session-preview">
+        <h2>Sessions</h2>
+        {% if event_sessions %}
+            <div class="mini-list">
+                {% for session in event_sessions %}
+                    <article class="mini-list-item session-card">
+                        <h3>{{ session.title }}</h3>
+                        <p>{{ session.start_datetime|date:"M d, Y H:i" }} - {{ session.end_datetime|date:"M d, Y H:i" }}</p>
+                        <p>
+                            Session capacity: {{ session.capacity }} total, {{ session.remaining_capacity }} remaining
+                            {% if session.remaining_capacity <= 0 %}
+                                <span class="full-badge">Session Full</span>
+                            {% endif %}
+                        </p>
+                        <p class="capacity-help">Session capacity only applies to this session.</p>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No sessions have been added yet.</p>
+        {% endif %}
+    </section>
+
+    <div class="action-row">
+        {% if event.status == "published" and user.is_authenticated and not user.is_superuser and user_role != "admin" %}
+            {% if user.is_authenticated and user_registration.status == "registered" %}
+                <a class="button btn btn-primary" href="{% url 'events:my_registrations' %}">View My Registrations</a>
+            {% elif event_remaining_capacity <= 0 %}
+                <span class="button btn btn-disabled">Event Full: registration unavailable</span>
+            {% else %}
+                <a class="button btn btn-primary" href="{% url 'events:event_register' event.id %}">Register for Event</a>
+            {% endif %}
+        {% endif %}
+        <a class="button btn btn-secondary" href="{% url 'events:event_list' %}">Back to Events</a>
+    </div>
+
+    {% if event.status == "published" and user.is_authenticated and not user.is_superuser and user_role != "admin" %}
+        {% if user.is_authenticated and user_registration.status == "registered" %}
+            <p class="notice-text">Already registered.</p>
+        {% elif event_remaining_capacity <= 0 %}
+            <p class="message warning">This event has reached its total registration capacity.</p>
+        {% endif %}
+    {% endif %}
+
+    <div class="action-row">
+        {% if can_manage %}
+            <a class="button btn btn-primary" href="{% url 'events:organiser_event_list' %}">Back to Manage Events</a>
+            <a class="button btn btn-secondary" href="{% url 'events:event_registrations' event.id %}">View Registrations</a>
+            {% if can_write %}
+                <a class="button btn btn-secondary" href="{% url 'events:session_list' event.id %}">Manage Sessions</a>
+            {% endif %}
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

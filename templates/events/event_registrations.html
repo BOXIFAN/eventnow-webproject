@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}EventNow | Event Registrations{% endblock %}
+
+{% block content %}
+<section class="page-heading with-actions">
+    <div>
+        <h1>Event Registrations</h1>
+        <p>{{ event.title }}</p>
+    </div>
+    <a class="button btn btn-secondary" href="{% url 'events:organiser_event_list' %}">Back to Manage Events</a>
+</section>
+
+<section class="summary-card">
+    <div class="detail-header">
+        <h2>{{ event.title }}</h2>
+        <span class="status-badge status-{{ event.status }}">{{ event.get_status_display }}</span>
+    </div>
+    <dl class="detail-grid">
+        <div>
+            <dt>Event time</dt>
+            <dd>{{ event.start_datetime|date:"M d, Y H:i" }} - {{ event.end_datetime|date:"M d, Y H:i" }}</dd>
+        </div>
+        <div>
+            <dt>Event capacity</dt>
+            <dd>
+                {{ event.capacity }} total, {{ active_registration_count }} active, {{ event_remaining_capacity }} remaining
+                {% if event_is_full %}
+                    <span class="full-badge">Full</span>
+                {% endif %}
+            </dd>
+        </div>
+    </dl>
+</section>
+
+<section class="section-block">
+    <h2>Session Capacity Overview</h2>
+    {% if sessions %}
+        <div class="table-wrapper table-wrap">
+            <table class="data-table responsive-table">
+                <thead>
+                    <tr>
+                        <th>Session</th>
+                        <th>Time</th>
+                        <th>Selected</th>
+                        <th>Capacity</th>
+                        <th>Remaining</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in sessions %}
+                        <tr>
+                            <td data-label="Session">{{ session.title }}</td>
+                            <td data-label="Time">{{ session.start_datetime|date:"M d, H:i" }} - {{ session.end_datetime|date:"H:i" }}</td>
+                            <td data-label="Selected">{{ session.selected_count }}</td>
+                            <td data-label="Capacity">{{ session.capacity }}</td>
+                            <td data-label="Remaining">{{ session.remaining_capacity }}</td>
+                            <td data-label="Status">
+                                {% if session.remaining_capacity <= 0 %}
+                                    <span class="full-badge">Full</span>
+                                {% else %}
+                                    <span class="available-badge">Available</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <section class="content-panel empty-state">
+            <p>No sessions have been added for this event yet.</p>
+        </section>
+    {% endif %}
+</section>
+
+<section class="section-block">
+    <h2>Registration List</h2>
+    {% if registrations %}
+        <section class="registration-grid">
+            {% for registration in registrations %}
+                <article class="registration-card">
+                    <div class="detail-header">
+                        <h3>{{ registration.user.username }}</h3>
+                        <span class="status-badge status-{{ registration.status }}">{{ registration.get_status_display }}</span>
+                    </div>
+                    <p>Email: {{ registration.user.email|default:"No email provided" }}</p>
+                    <p>Registered at: {{ registration.created_at|date:"M d, Y H:i" }}</p>
+
+                    <h3>Selected Sessions</h3>
+                    {% if registration.session_selections.all %}
+                        <ul class="plain-list">
+                            {% for selection in registration.session_selections.all %}
+                                <li>{{ selection.session.title }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No sessions selected.</p>
+                    {% endif %}
+                </article>
+            {% endfor %}
+        </section>
+    {% else %}
+        <section class="content-panel empty-state">
+            <h3>No registrations have been submitted for this event yet.</h3>
+        </section>
+    {% endif %}
+</section>
+
+<div class="action-row">
+    <a class="button btn btn-secondary" href="{% url 'events:organiser_event_list' %}">Back to Manage Events</a>
+    <a class="button btn btn-secondary" href="{% url 'events:session_list' event.id %}">Manage Sessions</a>
+    <a class="button btn btn-primary" href="{% url 'events:event_detail' event.id %}">View Event Detail</a>
+</div>
+{% endblock %}

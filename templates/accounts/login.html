@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}EventNow | Login{% endblock %}
+
+{% block content %}
+<section class="auth-layout">
+<section class="content-panel form-card auth-panel">
+    <h1>Login</h1>
+    <p>Sign in to browse recommendations, manage registrations, or access organiser and admin workflows.</p>
+
+    <form class="auth-form" method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <div class="form-field">
+            {{ form.username.label_tag }}
+            {{ form.username }}
+            {{ form.username.errors }}
+        </div>
+
+        <div class="form-field">
+            {{ form.password.label_tag }}
+            {{ form.password }}
+            {{ form.password.errors }}
+        </div>
+
+        <div class="btn-group">
+            <button class="button btn btn-primary" type="submit">Login</button>
+        </div>
+    </form>
+
+    <p class="form-footer">
+        New to EventNow? <a href="{% url 'accounts:register' %}">Create an account</a>.
+    </p>
+</section>
+</section>
+{% endblock %}

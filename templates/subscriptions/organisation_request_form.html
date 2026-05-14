@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}EventNow | Request Organiser Access{% endblock %}
+
+{% block content %}
+<section class="content-panel form-card">
+    <h1>Request Organiser Access</h1>
+    <p>Submit your organisation details for admin review. Once approved and linked to an active subscription, you will be able to publish and manage organiser events.</p>
+
+    {% if request_state.pending_organisation %}
+        <div class="warning-box">
+            <p>Your organisation request is pending admin review.</p>
+            <p><strong>{{ request_state.pending_organisation.name }}</strong></p>
+        </div>
+    {% elif request_state.active_organisation %}
+        <div class="message success">
+            You already have an active organisation record: {{ request_state.active_organisation.name }}.
+        </div>
+    {% else %}
+        {% if request_state.rejected_organisation %}
+            <p class="warning-box">Your last request was rejected. You can submit a new request if the administrator has asked you to provide updated details.</p>
+        {% endif %}
+
+        <form class="auth-form" method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            {% for field in form %}
+                <div class="form-field">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small>{{ field.help_text }}</small>
+                    {% endif %}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+
+            <div class="form-actions">
+                <button class="button primary-button" type="submit">Submit Request</button>
+                <a class="button secondary-button" href="{% url 'events:event_list' %}">Back to Events</a>
+            </div>
+        </form>
+    {% endif %}
+</section>
+{% endblock %}

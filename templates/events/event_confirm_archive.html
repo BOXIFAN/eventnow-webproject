@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}EventNow | Archive Event{% endblock %}
+
+{% block content %}
+<section class="content-panel">
+    <h1>Archive Event</h1>
+    <p>Are you sure you want to archive "{{ event.title }}"?</p>
+    <p>Archiving will not permanently delete the event. It will change the event status to archived and hide it from the public event list.</p>
+
+    <form class="form-actions" method="post">
+        {% csrf_token %}
+        <button class="button danger-button" type="submit">Confirm Archive</button>
+        <a class="button secondary-button" href="{% url 'events:organiser_event_list' %}">Cancel</a>
+    </form>
+</section>
+{% endblock %}

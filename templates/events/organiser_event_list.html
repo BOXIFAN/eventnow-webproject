@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}EventNow | Manage Events{% endblock %}
+
+{% block content %}
+<section class="page-heading with-actions">
+    <div>
+        <h1>Manage Events</h1>
+        {% if is_admin_view %}
+            <p>Admin view: you can see all organiser events for review and support.</p>
+        {% else %}
+            <p>These are the events that belong to your organiser account's organisation.</p>
+        {% endif %}
+        <p>From each event row, you can view, edit, manage sessions, view registrations, or archive the event.</p>
+    </div>
+    {% if has_publishing_access %}
+        <a class="button btn btn-primary" href="{% url 'events:event_create' %}">Create New Event</a>
+    {% else %}
+        <span class="button btn btn-disabled">Create Disabled</span>
+    {% endif %}
+</section>
+
+{% if not has_publishing_access %}
+    <p class="warning-box">Your organisation does not have an active subscription. You can view existing records, but cannot create new events.</p>
+{% endif %}
+
+<form class="filter-panel" method="get">
+    <label>
+        <span>Status</span>
+        <select name="status">
+            <option value="">All statuses</option>
+            {% for value, label in status_choices %}
+                <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </label>
+    <button class="button btn btn-secondary" type="submit">Filter</button>
+    <a class="button btn btn-secondary" href="{% url 'events:organiser_event_list' %}">Reset</a>
+</form>
+
+{% if events %}
+    <div class="table-wrapper table-wrap">
+        <table class="data-table responsive-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Start</th>
+                    <th>Registrations</th>
+                    <th>Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                    <tr>
+                        <td data-label="Title">{{ event.title }}</td>
+                        <td data-label="Status"><span class="status-badge status-{{ event.status }}">{{ event.get_status_display }}</span></td>
+                        <td data-label="Start">{{ event.start_datetime|date:"M d, Y H:i" }}</td>
+                        <td data-label="Registrations">
+                            {{ event.registered_count }} / {{ event.capacity }}
+                            <span class="capacity-help">{{ event.remaining_capacity }} remaining</span>
+                            {% if event.is_full %}
+                                <span class="full-badge">Full</span>
+                            {% endif %}
+                        </td>
+                        <td data-label="Price">{% if event.price == 0 %}Free{% else %}${{ event.price }}{% endif %}</td>
+                        <td data-label="Actions">
+                            <div class="action-row">
+                                <a class="button btn btn-secondary btn-small" href="{% url 'events:event_detail' event.id %}">View</a>
+                                <a class="button btn btn-secondary btn-small" href="{% url 'events:event_registrations' event.id %}">View Registrations</a>
+                                <a class="button btn btn-secondary btn-small" href="{% url 'events:session_list' event.id %}">
+                                    {% if event.can_write %}Manage Sessions{% else %}View Sessions{% endif %}
+                                </a>
+                                {% if event.can_write %}
+                                    <a class="button btn btn-primary btn-small" href="{% url 'events:event_edit' event.id %}">Edit</a>
+                                    <a class="button btn btn-danger btn-small" href="{% url 'events:event_archive' event.id %}">Archive</a>
+                                {% else %}
+                                    <span class="badge-readonly">Read-only: subscription inactive</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <section class="content-panel">
+        <h2>No events yet</h2>
+        <p>Create your first event to start building your organiser workflow.</p>
+        <a class="button btn btn-primary" href="{% url 'events:event_create' %}">Create New Event</a>
+    </section>
+{% endif %}
+{% endblock %}

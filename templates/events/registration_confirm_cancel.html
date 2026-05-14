@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}EventNow | Cancel Registration{% endblock %}
+
+{% block content %}
+<section class="content-panel">
+    <h1>Cancel Registration</h1>
+    <p>Are you sure you want to cancel your registration for "{{ registration.event.title }}"?</p>
+    <p>This will cancel your registration but will not delete the historical record.</p>
+
+    <form class="form-actions" method="post">
+        {% csrf_token %}
+        <button class="button danger-button" type="submit">Confirm Cancel</button>
+        <a class="button secondary-button" href="{% url 'events:my_registrations' %}">Back</a>
+    </form>
+</section>
+{% endblock %}

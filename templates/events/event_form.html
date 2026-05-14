@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}EventNow | {{ page_title }}{% endblock %}
+
+{% block content %}
+<section class="content-panel">
+    <h1>{{ page_title }}</h1>
+
+    <div class="help-panel">
+        <p>Organiser will be assigned automatically based on your login account.</p>
+        <p>Free events should use price 0.</p>
+        <p>Events created by organisers require admin approval before appearing publicly.</p>
+    </div>
+
+    {% if not can_save_event %}
+        <p class="message warning">Your organisation does not have an active subscription. Please contact the platform administrator to activate publishing access.</p>
+    {% endif %}
+
+    {% if not form.has_available_organisations or not form.has_available_categories or not form.has_available_venues %}
+        <div class="message warning">
+            <p>No organisations/categories/venues are available. Please create them in Django Admin before creating events.</p>
+            {% if not form.has_available_organisations %}
+                <p>No available organisation was found for your account.</p>
+            {% endif %}
+            {% if not form.has_available_categories %}
+                <p>No categories are available.</p>
+            {% endif %}
+            {% if not form.has_available_venues %}
+                <p>No venues are available.</p>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <form class="auth-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        {% for field in form %}
+            <div class="form-field">
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.name == "image" and event and event.image %}
+                    <div class="event-image-preview-panel">
+                        <p>Current image</p>
+                        <img class="event-image-preview" src="{{ event.image.url }}" alt="{{ event.title }} event image">
+                    </div>
+                {% endif %}
+                {% if field.help_text %}
+                    <small>{{ field.help_text }}</small>
+                {% endif %}
+                {{ field.errors }}
+            </div>
+        {% endfor %}
+
+        <div class="form-actions">
+            {% if can_save_event %}
+                <button class="button primary-button" type="submit">{{ submit_label }}</button>
+            {% else %}
+                <span class="button btn-disabled">Publishing Access Required</span>
+            {% endif %}
+            <a class="button secondary-button" href="{% url 'events:organiser_event_list' %}">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}
